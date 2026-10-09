@@ -1,0 +1,31 @@
+:root{--bg:#0d1117;--card:#161b22;--line:#30363d;--fg:#e6edf3;--mut:#8b949e;--ok:#3fb950;--bad:#f85149;--warn:#d29922;--acc:#58a6ff}
+@media (prefers-color-scheme:light){:root{--bg:#f6f8fa;--card:#fff;--line:#d0d7de;--fg:#1f2328;--mut:#656d76;--ok:#1a7f37;--bad:#cf222e;--warn:#9a6700;--acc:#0969da}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}
+a{color:var(--acc);text-decoration:none}a:hover{text-decoration:underline}
+.wrap{max-width:1100px;margin:0 auto;padding:24px 16px 64px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:24px}
+header h1{font-size:20px;margin:0}
+.who{display:flex;align-items:center;gap:10px;color:var(--mut)}
+.who img{width:28px;height:28px;border-radius:50%}
+button,.btn{background:var(--card);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:6px 12px;font:inherit;cursor:pointer}
+h2{font-size:16px;margin:32px 0 12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:16px}
+.card .label{color:var(--mut);font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+.card .big{font-size:28px;font-weight:600;margin:4px 0}
+.bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden;margin:8px 0}
+.bar>i{display:block;height:100%;background:var(--ok)}
+.bar>i.warn{background:var(--warn)}.bar>i.bad{background:var(--bad)}
+.mut{color:var(--mut)}.small{font-size:12px}
+table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--mut);font-weight:500;font-size:12px}
+tr:last-child td{border-bottom:0}
+.scroll{overflow-x:auto}
+.pill{display:inline-block;padding:0 8px;border-radius:12px;border:1px solid var(--line);font-size:12px;color:var(--mut)}
+.s-success{color:var(--ok)}.s-failure{color:var(--bad)}.s-other{color:var(--warn)}
+.login{max-width:340px;margin:12vh auto;padding:0 16px}
+.login form{display:grid;gap:12px}
+input{width:100%;padding:8px 10px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--fg);font:inherit}
+.err{color:var(--bad)}
