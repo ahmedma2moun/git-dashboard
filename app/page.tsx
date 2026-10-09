@@ -50,8 +50,10 @@ function UsageCard({ u }: { u: Usage }) {
 export default async function Dashboard() {
   let data;
   try {
-    const [viewer, repos] = await Promise.all([getViewer(), getRepos()]);
+    const [viewer, allRepos] = await Promise.all([getViewer(), getRepos()]);
     const orgs = (process.env.GITHUB_ORGS ?? "").split(",").map((s) => s.trim()).filter(Boolean);
+    const owners = new Set([viewer.login, ...orgs].map((o) => o.toLowerCase()));
+    const repos = allRepos.filter((r) => owners.has(r.owner.login.toLowerCase()));
     const usages = await Promise.all([
       getUsage(viewer.login, "user", viewer.plan?.name ?? "free"),
       ...orgs.map((o) => getUsage(o, "org", "team")),
