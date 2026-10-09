@@ -11,7 +11,13 @@ async function gh<T>(path: string, revalidate = 120): Promise<T> {
     },
     next: { revalidate },
   });
-  if (!res.ok) throw new Error(`GitHub ${res.status} on ${path}`);
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    const scopes = res.headers.get("x-oauth-scopes");
+    throw new Error(
+      `GitHub ${res.status} on ${path}: ${body.message ?? ""}${scopes !== null ? ` (token scopes: ${scopes || "none"})` : ""}`,
+    );
+  }
   return res.json() as Promise<T>;
 }
 
@@ -159,7 +165,7 @@ export async function getUsage(
       );
       out.source = "legacy";
     } catch (e2) {
-      out.error = (e1 as Error).message;
+      out.error = `${(e1 as Error).message} | legacy: ${(e2 as Error).message}`;
     }
   }
 
