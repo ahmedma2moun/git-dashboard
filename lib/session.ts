@@ -1,50 +1,38 @@
-// Edge-compatible (Web Crypto) signed-cookie session.
+// Edge-compatible (Web Crypto). The GitHub token lives in an AES-GCM encrypted,
+// HTTP-only cookie; SESSION_SECRET is the server-side encryption key.
 export const COOKIE = "gd_session";
 const MAX_AGE = 60 * 60 * 24 * 7;
 
-const enc = new TextEncoder();
-
-async function hmac(data: string): Promise<string> {
+async function key(): Promise<CryptoKey> {
   const secret = process.env.SESSION_SECRET;
   if (!secret) throw new Error("SESSION_SECRET is not set");
-  const key = await crypto.subtle.importKey(
-    "raw",
-    enc.encode(secret),
-    { name: "HMAC", hash: "SHA-256" },
-    false,
-    ["sign"],
-  );
-  const sig = await crypto.subtle.sign("HMAC", key, enc.encode(data));
-  return Buffer.from(sig).toString("base64url");
+  const hash = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(secret));
+  return crypto.subtle.importKey("raw", hash, "AES-GCM", false, ["encrypt", "decrypt"]);
 }
 
-export function safeEqual(a: string, b: string): boolean {
-  const x = enc.encode(a);
-  const y = enc.encode(b);
-  let diff = x.length ^ y.length;
-  for (let i = 0; i < Math.max(x.length, y.length); i++) {
-    diff |= (x[i] ?? 0) ^ (y[i] ?? 0);
-  }
-  return diff === 0;
+export async function sealToken(token: string): Promise<string> {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const data = new TextEncoder().encode(JSON.stringify({ t: token, exp: Date.now() + MAX_AGE * 1000 }));
+  const ct = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv }, await key(), data));
+  const out = new Uint8Array(iv.length + ct.length);
+  out.set(iv);
+  out.set(ct, iv.length);
+  return Buffer.from(out).toString("base64url");
 }
 
-export async function createSession(user: string): Promise<string> {
-  const payload = Buffer.from(
-    JSON.stringify({ u: user, exp: Date.now() + MAX_AGE * 1000 }),
-  ).toString("base64url");
-  return `${payload}.${await hmac(payload)}`;
-}
-
-export async function verifySession(token?: string): Promise<boolean> {
-  if (!token) return false;
-  const [payload, sig] = token.split(".");
-  if (!payload || !sig) return false;
+export async function openToken(cookie?: string): Promise<string | null> {
+  if (!cookie) return null;
   try {
-    if (!safeEqual(sig, await hmac(payload))) return false;
-    const { exp } = JSON.parse(Buffer.from(payload, "base64url").toString());
-    return typeof exp === "number" && exp > Date.now();
+    const raw = new Uint8Array(Buffer.from(cookie, "base64url"));
+    const pt = await crypto.subtle.decrypt(
+      { name: "AES-GCM", iv: raw.slice(0, 12) },
+      await key(),
+      raw.slice(12),
+    );
+    const { t, exp } = JSON.parse(new TextDecoder().decode(pt));
+    return typeof t === "string" && exp > Date.now() ? t : null;
   } catch {
-    return false;
+    return null;
   }
 }
 

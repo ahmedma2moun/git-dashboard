@@ -1,15 +1,18 @@
+import { cookies } from "next/headers";
+import { COOKIE, openToken } from "./session";
+
 const API = "https://api.github.com";
 
-async function gh<T>(path: string, revalidate = 120): Promise<T> {
-  const token = process.env.GITHUB_TOKEN;
-  if (!token) throw new Error("GITHUB_TOKEN is not set");
+async function gh<T>(path: string, _revalidate = 0): Promise<T> {
+  const token = await openToken((await cookies()).get(COOKIE)?.value);
+  if (!token) throw new Error("Not signed in");
   const res = await fetch(`${API}${path}`, {
     headers: {
       Authorization: `Bearer ${token}`,
       Accept: "application/vnd.github+json",
       "X-GitHub-Api-Version": "2022-11-28",
     },
-    next: { revalidate },
+    cache: "no-store", // per-user token: never share cached responses
   });
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));

@@ -66,7 +66,7 @@ export default async function Dashboard() {
       <main className="wrap">
         <h1>GitHub Dashboard</h1>
         <p className="err">{(e as Error).message}</p>
-        <p className="mut">Check GITHUB_TOKEN in your environment variables.</p>
+        <p className="mut">Your token may have expired or been revoked. Sign out and sign in again.</p>
       </main>
     );
   }

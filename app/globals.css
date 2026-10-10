@@ -29,3 +29,7 @@ tr:last-child td{border-bottom:0}
 .login form{display:grid;gap:12px}
 input{width:100%;padding:8px 10px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--fg);font:inherit}
 .err{color:var(--bad)}
+.login{max-width:460px}
+.login h2{margin-top:32px}
+.steps{padding-left:20px;display:grid;gap:6px}
+code{background:var(--card);border:1px solid var(--line);border-radius:4px;padding:0 4px}
